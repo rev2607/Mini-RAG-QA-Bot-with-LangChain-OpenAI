@@ -1,6 +1,6 @@
 # RAG Q&A Bot with LangChain and OpenAI
 
-A complete, production-ready Retrieval-Augmented Generation (RAG) question-answering system built with Python, LangChain, OpenAI, and Chroma. This project demonstrates how to build an AI system that can answer questions based on your own documents by combining semantic search with large language models.
+A complete, production-ready Retrieval-Augmented Generation (RAG) question-answering system built with Python, **LangChain**, OpenAI, and Chroma. This project demonstrates how to build an AI system that can answer questions based on your own documents by combining semantic search with large language models using **LangChain's powerful abstractions**.
 
 ## ⚡ Quick Start (30 seconds)
 
@@ -30,10 +30,25 @@ pip install -r requirements.txt
 
 This demo shows how RAG works by ingesting documents, creating embeddings, storing them in a vector database, and using them to answer questions with proper source citations.
 
+## 🔗 LangChain Features Used
+
+This project demonstrates key LangChain components:
+
+- **Document Loaders**: `TextLoader` and `PyPDFLoader` for loading various file formats
+- **Text Splitters**: `RecursiveCharacterTextSplitter` for intelligent document chunking
+- **Embeddings**: `OpenAIEmbeddings` for creating vector representations
+- **Vector Stores**: `Chroma` integration for storing and retrieving embeddings
+- **Retrievers**: `as_retriever()` for semantic search functionality
+- **Chains**: `RetrievalQA` chain for question-answering workflows
+- **Prompts**: `PromptTemplate` for structured prompt engineering
+- **LLMs**: `ChatOpenAI` for language model integration
+
 ## 🛠️ Tech Stack
 
 - **Python 3.10+** - Core language
-- **LangChain** - LLM framework and utilities
+- **LangChain** - LLM framework with document loaders, text splitters, embeddings, and chains
+- **LangChain OpenAI** - OpenAI integration for embeddings and chat models
+- **LangChain Community** - Document loaders for PDF and text files
 - **OpenAI** - Embeddings and text generation
 - **Chroma** - Local vector database
 - **FastAPI** - Web API framework
@@ -46,33 +61,44 @@ This demo shows how RAG works by ingesting documents, creating embeddings, stori
 rag-qa-langchain-openai/
 ├── app/
 │   ├── __init__.py
-│   ├── config.py          # Configuration and environment variables
-│   ├── utils.py           # Text processing utilities
-│   ├── ingest.py          # Document ingestion and embedding
-│   ├── qa.py              # Question-answering logic
-│   └── server.py          # FastAPI web server
+│   ├── config.py                    # Configuration and environment variables
+│   ├── utils.py                     # Text processing utilities
+│   ├── ingest.py                    # LangChain document ingestion and embedding
+│   ├── qa.py                        # LangChain question-answering logic
+│   ├── mock_ingest.py               # Original direct API mock ingestion
+│   ├── mock_qa.py                   # Original direct API mock Q&A
+│   ├── mock_langchain_ingest.py     # LangChain mock ingestion
+│   ├── mock_langchain_qa.py         # LangChain mock Q&A
+│   └── server.py                    # FastAPI web server
 ├── sample_data/
-│   └── sample_text.txt    # Sample documents for testing
+│   └── sample_text.txt              # Sample documents for testing
 ├── scripts/
-│   ├── run_ingest.sh      # Document ingestion script
-│   └── start_server.sh    # Server startup script
+│   ├── run_ingest.sh                # Document ingestion script
+│   └── start_server.sh              # Server startup script
 ├── tests/
-│   └── test_utils.py      # Unit tests
-├── requirements.txt       # Python dependencies
-├── .gitignore            # Git ignore rules
-├── demo_output.txt       # Example outputs
-└── README.md             # This file
+│   └── test_utils.py                # Unit tests
+├── requirements.txt                 # Python dependencies
+├── .gitignore                      # Git ignore rules
+├── demo_output.txt                 # Example outputs
+├── demo_complete.sh                # Original demo script
+├── demo_langchain.sh               # LangChain demo script
+└── README.md                       # This file
 ```
 
 ## 🚀 How to Run the Model
 
 ### Method 1: Quick Demo (Recommended for First Time)
 
-**Run the complete demo in one command:**
+**Run the LangChain demo in one command:**
+```bash
+./demo_langchain.sh
+```
+This will automatically ingest sample data using LangChain and test the system with multiple questions.
+
+**Or run the original demo:**
 ```bash
 ./demo_complete.sh
 ```
-This will automatically ingest sample data and test the system with multiple questions.
 
 ### Method 2: Step-by-Step Setup
 
@@ -92,31 +118,43 @@ pip install -r requirements.txt
 
 #### Step 2: Choose Your Mode
 
-**Option A: Mock Mode (No API Key Required)**
+**Option A: LangChain Mock Mode (No API Key Required)**
 ```bash
-# Ingest sample documents with mock embeddings
-python3 -m app.mock_ingest sample_data/
+# Ingest with LangChain document loaders and mock embeddings
+python3 -m app.mock_langchain_ingest sample_data/
 
-# Run the Q&A system
-python3 -m app.mock_qa --question "What is RAG?"
+# Run LangChain Q&A system
+python3 -m app.mock_langchain_qa --question "What is RAG?"
 
 # Or run interactively
-python3 -m app.mock_qa
+python3 -m app.mock_langchain_qa
 ```
 
-**Option B: Real Mode (Requires OpenAI API Key)**
+**Option B: LangChain Real Mode (Requires OpenAI API Key)**
 ```bash
 # Set your OpenAI API key
 export OPENAI_API_KEY="your-openai-api-key-here"
 
-# Ingest sample documents with real embeddings
+# Ingest with LangChain document loaders and real embeddings
 python3 -m app.ingest sample_data/
 
-# Run the Q&A system
+# Run LangChain Q&A system
 python3 -m app.qa --question "What is RAG?"
 
 # Or run interactively
 python3 -m app.qa
+```
+
+**Option C: Original Direct API Mode (Requires OpenAI API Key)**
+```bash
+# Set your OpenAI API key
+export OPENAI_API_KEY="your-openai-api-key-here"
+
+# Ingest with direct OpenAI API calls
+python3 -m app.mock_ingest sample_data/
+
+# Run direct API Q&A system
+python3 -m app.mock_qa --question "What is RAG?"
 ```
 
 #### Step 3: Web Interface (Optional)
@@ -164,22 +202,31 @@ Modify in `app/config.py`:
 
 ### CLI Usage
 
-**Mock Mode (No API Key):**
+**LangChain Mock Mode (No API Key):**
 ```bash
 # Single question
-python3 -m app.mock_qa --question "What is RAG?"
+python3 -m app.mock_langchain_qa --question "What is RAG?"
 
 # Interactive mode
-python3 -m app.mock_qa
+python3 -m app.mock_langchain_qa
 ```
 
-**Real Mode (With API Key):**
+**LangChain Real Mode (With API Key):**
 ```bash
 # Single question
 python3 -m app.qa --question "What is RAG?"
 
 # Interactive mode
 python3 -m app.qa
+```
+
+**Original Direct API Mode:**
+```bash
+# Single question
+python3 -m app.mock_qa --question "What is RAG?"
+
+# Interactive mode
+python3 -m app.mock_qa
 ```
 
 ### API Usage
