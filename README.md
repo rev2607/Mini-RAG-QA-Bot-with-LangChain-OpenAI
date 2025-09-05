@@ -189,10 +189,6 @@ git branch -M main
 git push -u origin main
 ```
 
-## 🎯 What to Say in Interview
-
-**"I built a complete RAG system that demonstrates how to ground AI responses in retrieved documents. The project shows my understanding of vector embeddings, semantic search, and prompt engineering. I learned how to chunk documents effectively, create embeddings with OpenAI, store them in Chroma for fast retrieval, and design prompts that encourage source attribution. The system includes both CLI and web interfaces, proper error handling, and unit tests - showing I can build production-ready AI applications."**
-
 ## 🔍 Key Technical Learnings
 
 - **Vector Embeddings**: Converting text to numerical representations for semantic search
@@ -202,14 +198,3 @@ git push -u origin main
 - **Vector Databases**: Storing and querying embeddings efficiently with Chroma
 - **API Design**: Building clean REST APIs with FastAPI and proper error handling
 
-## 📝 License
-
-MIT License - feel free to use this project for learning and interviews!
-
-## 🤝 Contributing
-
-This is a demo project, but suggestions and improvements are welcome!
-
----
-
-**Ready to run in 1-2 hours!** 🚀
