@@ -18,6 +18,12 @@ pip install -r requirements.txt
 
 **That's it!** The demo will automatically ingest sample data and test the system with multiple questions.
 
+## 📸 Demo
+
+![RAG Q&A Demo](demo.png)
+
+*The system answering "What is RAG?" with source attribution and similarity scores*
+
 ## 🚀 What is RAG?
 
 **Retrieval-Augmented Generation (RAG)** is a powerful AI technique that:
