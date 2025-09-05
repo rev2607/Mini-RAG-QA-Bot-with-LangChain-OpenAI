@@ -1,0 +1,11 @@
+What are Large Language Models (LLMs)?
+
+Large Language Models (LLMs) are artificial intelligence systems trained on vast amounts of text data to understand and generate human-like language. These models use deep learning techniques, particularly transformer architectures, to process and generate text. LLMs like GPT, BERT, and T5 can perform a wide range of language tasks including text generation, translation, summarization, and question answering. They work by learning patterns and relationships in language through exposure to billions of text examples, enabling them to predict the next word in a sequence or generate coherent responses to prompts.
+
+What is Retrieval-Augmented Generation (RAG)?
+
+Retrieval-Augmented Generation (RAG) is a technique that combines the power of large language models with external knowledge retrieval to provide more accurate and up-to-date answers. Instead of relying solely on the model's training data, RAG first retrieves relevant information from a knowledge base or document collection, then uses that information as context when generating responses. This approach helps address the limitations of LLMs, such as knowledge cutoff dates and hallucination, by grounding responses in actual retrieved documents. RAG systems typically involve three main components: a retriever that finds relevant documents, a generator (the LLM) that creates responses, and a knowledge base that stores the information to be retrieved.
+
+How does RAG improve AI responses?
+
+RAG significantly improves AI responses by providing access to current, specific, and verifiable information that may not be present in the model's training data. This approach reduces hallucination by grounding responses in retrieved facts, enables the system to answer questions about recent events or specific documents, and allows for better control over the information sources used in responses. RAG systems can be particularly valuable in enterprise applications where accuracy and source attribution are critical, such as customer support, legal research, and technical documentation.
