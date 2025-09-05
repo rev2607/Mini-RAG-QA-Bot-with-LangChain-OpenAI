@@ -18,4 +18,8 @@ pydantic==2.5.3
 
 # Additional dependencies for Chroma
 sentence-transformers==2.2.2
-numpy==1.24.4
+numpy>=1.26.0
+
+# Fix for Chroma compatibility - use specific versions
+httpx==0.25.2
+httpcore==1.0.2

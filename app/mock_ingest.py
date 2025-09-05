@@ -1,21 +1,19 @@
-"""Document ingestion and embedding storage using Chroma and OpenAI."""
+"""Mock document ingestion for demonstration without API calls."""
 
 import os
 import logging
 from pathlib import Path
 from typing import List, Optional
+import json
 
 import chromadb
-from openai import OpenAI
+import numpy as np
 
 from .config import (
-    OPENAI_API_KEY, 
-    OPENAI_MODEL, 
-    EMBEDDING_MODEL, 
-    CHUNK_SIZE, 
-    CHUNK_OVERLAP,
     CHROMA_DB_PATH,
-    COLLECTION_NAME
+    COLLECTION_NAME,
+    CHUNK_SIZE, 
+    CHUNK_OVERLAP
 )
 from .utils import load_document, chunk_text, clean_text, get_file_info
 
@@ -24,12 +22,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class DocumentIngester:
-    """Handles document ingestion and embedding storage."""
+class MockDocumentIngester:
+    """Mock document ingester that creates fake embeddings for demonstration."""
     
     def __init__(self):
-        """Initialize the document ingester."""
-        self.client = OpenAI(api_key=OPENAI_API_KEY)
+        """Initialize the mock document ingester."""
         self.chroma_client = chromadb.PersistentClient(
             path=CHROMA_DB_PATH
         )
@@ -48,30 +45,21 @@ class DocumentIngester:
             logger.info(f"Created new collection: {COLLECTION_NAME}")
         return collection
     
-    def _create_embeddings(self, texts: List[str]) -> List[List[float]]:
-        """Create embeddings for a list of texts using OpenAI."""
-        try:
-            response = self.client.embeddings.create(
-                model=EMBEDDING_MODEL,
-                input=texts
-            )
-            return [embedding.embedding for embedding in response.data]
-        except Exception as e:
-            logger.error(f"Error creating embeddings: {e}")
-            raise
+    def _create_mock_embeddings(self, texts: List[str]) -> List[List[float]]:
+        """Create mock embeddings for demonstration."""
+        # Create random but consistent embeddings based on text content
+        embeddings = []
+        for text in texts:
+            # Use text hash to create consistent "random" embeddings
+            text_hash = hash(text) % 1000000
+            np.random.seed(text_hash)
+            embedding = np.random.normal(0, 1, 1536).tolist()  # OpenAI embedding dimension
+            embeddings.append(embedding)
+        return embeddings
     
     def ingest_file(self, file_path: str, overwrite: bool = False) -> int:
-        """
-        Ingest a single document file.
-        
-        Args:
-            file_path: Path to the document file
-            overwrite: Whether to overwrite existing documents
-            
-        Returns:
-            Number of chunks ingested
-        """
-        logger.info(f"Starting ingestion of: {file_path}")
+        """Ingest a single document file with mock embeddings."""
+        logger.info(f"Starting mock ingestion of: {file_path}")
         
         # Load document content
         try:
@@ -110,11 +98,11 @@ class DocumentIngester:
                 self.collection.delete(ids=existing_docs['ids'])
                 logger.info(f"Removed existing chunks for {file_path}")
         
-        # Create embeddings
+        # Create mock embeddings
         try:
-            embeddings = self._create_embeddings(chunks)
+            embeddings = self._create_mock_embeddings(chunks)
         except Exception as e:
-            logger.error(f"Error creating embeddings for {file_path}: {e}")
+            logger.error(f"Error creating mock embeddings for {file_path}: {e}")
             return 0
         
         # Prepare data for storage
@@ -145,16 +133,7 @@ class DocumentIngester:
             return 0
     
     def ingest_directory(self, directory_path: str, overwrite: bool = False) -> int:
-        """
-        Ingest all supported documents in a directory.
-        
-        Args:
-            directory_path: Path to the directory
-            overwrite: Whether to overwrite existing documents
-            
-        Returns:
-            Total number of chunks ingested
-        """
+        """Ingest all supported documents in a directory."""
         directory = Path(directory_path)
         if not directory.exists():
             logger.error(f"Directory not found: {directory_path}")
@@ -168,7 +147,7 @@ class DocumentIngester:
                 chunks = self.ingest_file(str(file_path), overwrite)
                 total_chunks += chunks
         
-        logger.info(f"Ingestion complete. Total chunks: {total_chunks}")
+        logger.info(f"Mock ingestion complete. Total chunks: {total_chunks}")
         return total_chunks
     
     def get_collection_stats(self) -> dict:
@@ -189,14 +168,14 @@ def main():
     """Main function for CLI usage."""
     import argparse
     
-    parser = argparse.ArgumentParser(description="Ingest documents for RAG system")
+    parser = argparse.ArgumentParser(description="Mock ingest documents for RAG system")
     parser.add_argument("path", help="Path to file or directory to ingest")
     parser.add_argument("--overwrite", action="store_true", help="Overwrite existing documents")
     
     args = parser.parse_args()
     
     try:
-        ingester = DocumentIngester()
+        ingester = MockDocumentIngester()
         path = Path(args.path)
         
         if path.is_file():
@@ -214,7 +193,7 @@ def main():
         print(f"Collection stats: {stats}")
         
     except Exception as e:
-        logger.error(f"Ingestion failed: {e}")
+        logger.error(f"Mock ingestion failed: {e}")
         return 1
     
     return 0

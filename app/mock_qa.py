@@ -1,16 +1,13 @@
-"""Question-answering functionality using RAG with OpenAI and Chroma."""
+"""Mock question-answering functionality for demonstration without API calls."""
 
 import logging
 from typing import List, Dict, Any, Optional
 import json
 
 import chromadb
-from openai import OpenAI
+import numpy as np
 
 from .config import (
-    OPENAI_API_KEY, 
-    OPENAI_MODEL, 
-    EMBEDDING_MODEL, 
     CHROMA_DB_PATH,
     COLLECTION_NAME,
     TOP_K_RESULTS
@@ -21,12 +18,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class RAGQA:
-    """RAG-based question answering system."""
+class MockRAGQA:
+    """Mock RAG-based question answering system for demonstration."""
     
     def __init__(self):
-        """Initialize the RAG QA system."""
-        self.client = OpenAI(api_key=OPENAI_API_KEY)
+        """Initialize the mock RAG QA system."""
         self.chroma_client = chromadb.PersistentClient(
             path=CHROMA_DB_PATH
         )
@@ -39,22 +35,17 @@ class RAGQA:
         except ValueError:
             raise ValueError(f"Collection {COLLECTION_NAME} not found. Please run ingestion first.")
     
-    def _create_query_embedding(self, query: str) -> List[float]:
-        """Create embedding for the query."""
-        try:
-            response = self.client.embeddings.create(
-                model=EMBEDDING_MODEL,
-                input=[query]
-            )
-            return response.data[0].embedding
-        except Exception as e:
-            logger.error(f"Error creating query embedding: {e}")
-            raise
+    def _create_mock_query_embedding(self, query: str) -> List[float]:
+        """Create mock embedding for the query."""
+        # Use query hash to create consistent "random" embedding
+        query_hash = hash(query) % 1000000
+        np.random.seed(query_hash)
+        return np.random.normal(0, 1, 1536).tolist()
     
     def _retrieve_relevant_chunks(self, query: str, top_k: int = TOP_K_RESULTS) -> List[Dict[str, Any]]:
         """Retrieve relevant document chunks for the query."""
         try:
-            query_embedding = self._create_query_embedding(query)
+            query_embedding = self._create_mock_query_embedding(query)
             
             results = self.collection.query(
                 query_embeddings=[query_embedding],
@@ -83,38 +74,30 @@ class RAGQA:
             logger.error(f"Error retrieving chunks: {e}")
             raise
     
-    def _create_prompt(self, query: str, chunks: List[Dict[str, Any]]) -> str:
-        """Create the prompt for the LLM."""
-        context = "\n\n".join([
-            f"Source {i+1} (Score: {chunk['similarity_score']:.3f}):\n{chunk['text']}"
-            for i, chunk in enumerate(chunks)
-        ])
+    def _create_mock_answer(self, query: str, chunks: List[Dict[str, Any]]) -> str:
+        """Create a mock answer based on retrieved chunks."""
+        if not chunks:
+            return "I don't have any relevant information to answer this question."
         
-        system_prompt = """You are a helpful AI assistant that answers questions based on provided context. 
-Use the information below to answer the user's question. If the answer is not in the context, say 'I don't know — see sources'.
-
-Be concise and accurate. When possible, reference which source(s) you used for your answer."""
+        # Simple keyword-based answer generation for demonstration
+        query_lower = query.lower()
         
-        user_prompt = f"""Context:
-{context}
-
-Question: {query}
-
-Answer:"""
+        if "rag" in query_lower:
+            return "RAG (Retrieval-Augmented Generation) is a technique that combines large language models with external knowledge retrieval to provide more accurate and up-to-date answers. It works by first retrieving relevant information from a knowledge base, then using that information as context when generating responses. This approach helps reduce hallucination by grounding responses in actual retrieved documents."
         
-        return f"{system_prompt}\n\n{user_prompt}"
+        elif "llm" in query_lower or "language model" in query_lower:
+            return "Large Language Models (LLMs) are artificial intelligence systems trained on vast amounts of text data to understand and generate human-like language. They use deep learning techniques, particularly transformer architectures, to process and generate text. LLMs can perform a wide range of language tasks including text generation, translation, summarization, and question answering."
+        
+        elif "benefit" in query_lower or "advantage" in query_lower:
+            return "RAG provides several key benefits: it reduces hallucination by grounding responses in retrieved facts, enables the system to answer questions about recent events or specific documents, and allows for better control over information sources. RAG systems are particularly valuable in enterprise applications where accuracy and source attribution are critical."
+        
+        else:
+            # Generic answer based on the most relevant chunk
+            best_chunk = chunks[0]
+            return f"Based on the retrieved information: {best_chunk['text'][:200]}..."
     
     def ask_question(self, question: str, top_k: int = TOP_K_RESULTS) -> Dict[str, Any]:
-        """
-        Ask a question and get an answer with sources.
-        
-        Args:
-            question: The question to ask
-            top_k: Number of top chunks to retrieve
-            
-        Returns:
-            Dictionary containing answer, sources, and metadata
-        """
+        """Ask a question and get a mock answer with sources."""
         logger.info(f"Processing question: {question}")
         
         try:
@@ -130,21 +113,8 @@ Answer:"""
                     "question": question
                 }
             
-            # Create prompt
-            prompt = self._create_prompt(question, chunks)
-            
-            # Get answer from OpenAI
-            response = self.client.chat.completions.create(
-                model=OPENAI_MODEL,
-                messages=[
-                    {"role": "system", "content": "You are a helpful AI assistant that answers questions based on provided context."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=500,
-                temperature=0.1
-            )
-            
-            answer = response.choices[0].message.content.strip()
+            # Create mock answer
+            answer = self._create_mock_answer(question, chunks)
             
             # Format sources
             sources = [
@@ -164,7 +134,7 @@ Answer:"""
                 "question": question
             }
             
-            logger.info(f"Generated answer with {len(sources)} sources")
+            logger.info(f"Generated mock answer with {len(sources)} sources")
             return result
             
         except Exception as e:
@@ -218,14 +188,14 @@ def main():
     """Main function for CLI usage."""
     import argparse
     
-    parser = argparse.ArgumentParser(description="RAG Q&A CLI")
+    parser = argparse.ArgumentParser(description="Mock RAG Q&A CLI")
     parser.add_argument("--question", "-q", help="Question to ask")
     parser.add_argument("--interactive", "-i", action="store_true", help="Interactive mode")
     
     args = parser.parse_args()
     
     try:
-        qa = RAGQA()
+        qa = MockRAGQA()
         
         # Check collection
         info = qa.get_collection_info()
@@ -233,7 +203,7 @@ def main():
             print(f"Error: {info['error']}")
             return 1
         
-        print(f"RAG Q&A System Ready")
+        print(f"Mock RAG Q&A System Ready")
         print(f"Collection: {info['total_chunks']} chunks available")
         print()
         

@@ -78,6 +78,7 @@ export OPENAI_API_KEY="your-openai-api-key-here"
 
 ### 3. Ingest Sample Data
 
+**Option A: With OpenAI API (requires valid API key)**
 ```bash
 # Make scripts executable (if needed)
 chmod +x scripts/*.sh
@@ -86,16 +87,26 @@ chmod +x scripts/*.sh
 ./scripts/run_ingest.sh
 ```
 
+**Option B: Mock Version (no API key needed)**
+```bash
+# Ingest with mock embeddings for demonstration
+python3 -m app.mock_ingest sample_data/
+```
+
 ### 4. Run the System
 
 **Option A: Command Line Interface**
 ```bash
-python -m app.qa
-# Interactive mode - type questions and get answers
+# With OpenAI API
+python3 -m app.qa
+
+# Mock version (no API key needed)
+python3 -m app.mock_qa
 ```
 
 **Option B: Web Server**
 ```bash
+# Start server (requires OpenAI API key)
 ./scripts/start_server.sh
 # Visit http://127.0.0.1:8000 for web interface
 # Or use API: curl -X POST "http://127.0.0.1:8000/ask" -H "Content-Type: application/json" -d '{"question":"What is RAG?"}'
